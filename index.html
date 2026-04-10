@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <title>百家乐 · 智能路纸分析器</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1>🎲 百家乐 · 路纸决策助手</h1>
+      <p class="subtitle">多路协同 · 加权评分 · 算牌辅助</p>
+    </header>
+
+    <section class="control-panel card">
+      <h2>📝 记录每一局</h2>
+      <div class="button-group">
+        <button class="btn banker" id="recordB">庄 (B)</button>
+        <button class="btn player" id="recordP">闲 (P)</button>
+        <button class="btn tie" id="recordT">和 (T)</button>
+      </div>
+      <div class="action-row">
+        <button class="btn reset" id="resetBtn">🔄 重置所有</button>
+        <button class="btn shoe-reset" id="shoeResetBtn">♻️ 新靴开始</button>
+      </div>
+      <div class="shoe-info">
+        <span>📊 当前靴进度: <span id="shoeProgress">0</span> / 70 局</span>
+        <span class="running-count" id="runningCountDisplay">🏷️ RC: 0</span>
+      </div>
+    </section>
+
+    <section class="roadmap-section card">
+      <div class="tabs">
+        <button class="tab active" data-road="bead">珠盘路</button>
+        <button class="tab" data-road="big">大路</button>
+        <button class="tab" data-road="bigeye">大眼仔</button>
+      </div>
+      <div id="roadmapContainer" class="roadmap-container">
+        <div class="roadmap-placeholder">点击上方按钮开始记录</div>
+      </div>
+    </section>
+
+    <section class="analysis-result card">
+      <div class="result-header">
+        <h2>🧠 综合决策</h2>
+        <span class="badge" id="confidenceBadge">--</span>
+      </div>
+      <div id="decisionDisplay" class="decision-display">
+        <div class="decision-main">等待数据</div>
+        <div class="decision-detail"></div>
+      </div>
+      <div id="featureDetails" class="feature-details"></div>
+    </section>
+
+    <section class="tuning-panel card">
+      <h3>⚖️ 调整你的路感权重</h3>
+      <div class="slider-group">
+        <label><span>📈 长龙强度</span> <input type="range" id="wStreak" min="0" max="100" value="75"></label>
+        <label><span>🧱 列高整齐</span> <input type="range" id="wUniform" min="0" max="100" value="65"></label>
+        <label><span>📐 庄闲坡度</span> <input type="range" id="wSlope" min="0" max="100" value="50"></label>
+        <label><span>🔄 单跳敏感</span> <input type="range" id="wJump" min="0" max="100" value="45"></label>
+        <label><span>🔁 双跳规律</span> <input type="range" id="wPair" min="0" max="100" value="55"></label>
+        <label><span>🧩 拥挤反转</span> <input type="range" id="wCrowd" min="0" max="100" value="30"></label>
+      </div>
+      <button class="btn apply-weights" id="applyWeightsBtn">应用权重并重新分析</button>
+    </section>
+
+    <section class="counting-panel card">
+      <h3>🃏 基础算牌追踪</h3>
+      <p class="hint">输入每局实际牌值 (2-9, T/J/Q/K, A) 更新计数</p>
+      <div class="card-input-area">
+        <input type="text" id="cardInput" placeholder="例: 4,9,T,A" maxlength="20" inputmode="text" autocapitalize="characters">
+        <button class="btn small" id="updateCountBtn">更新计数</button>
+      </div>
+      <div class="count-stats">
+        <div>流水计数 (RC): <span id="rcValue">0</span></div>
+        <div>剩余副数: ≈ <span id="decksLeft">6.0</span></div>
+        <div>真实计数 (TC): <span id="tcValue">0.00</span></div>
+        <div>庄闲优势倾向: <span id="countSuggestion">—</span></div>
+      </div>
+      <p class="footnote">* 简化Hi-Lo: 2-6=+1, 7-9=0, T/J/Q/K/A=-1</p>
+    </section>
+
+    <section class="stats-panel card">
+      <h3>📊 近期统计 (近20局)</h3>
+      <div id="statsDisplay" class="stats-grid">
+        <div>总: <span id="totalHands">0</span></div>
+        <div>庄: <span id="bankerCount">0</span></div>
+        <div>闲: <span id="playerCount">0</span></div>
+        <div>和: <span id="tieCount">0</span></div>
+        <div>庄率: <span id="bankerRate">0%</span></div>
+        <div>闲率: <span id="playerRate">0%</span></div>
+        <div>当前连: <span id="streakInfo">-</span></div>
+      </div>
+    </section>
+
+    <footer>
+      <p class="risk-warning">⚠️ 本工具仅供娱乐与学习。所有分析基于历史图形，无法保证未来结果。请理性游戏，设定止损。</p>
+    </footer>
+  </div>
+
+  <script src="analyzer.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
