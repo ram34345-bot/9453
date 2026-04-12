@@ -81,11 +81,12 @@ function hydrateFromStorage() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return;
     const state = JSON.parse(raw);
-    if (Array.isArray(state.history)) analyzer.history = state.history;
-    if (typeof state.runningCount === 'number') analyzer.runningCount = state.runningCount;
-    if (typeof state.decksRemaining === 'number') analyzer.decksRemaining = state.decksRemaining;
-    if (typeof state.cardsPlayed === 'number') analyzer.cardsPlayed = state.cardsPlayed;
-    if (Array.isArray(state.cardHistory)) analyzer.cardHistory = state.cardHistory;
+    // 为避免上一局影响新局判断，开新页面默认不恢复对局与算牌状态
+    analyzer.history = [];
+    analyzer.runningCount = 0;
+    analyzer.decksRemaining = 6;
+    analyzer.cardsPlayed = 0;
+    analyzer.cardHistory = [];
     if (state.weights && typeof state.weights === 'object') {
       weights = { ...weights, ...state.weights };
     }
@@ -99,11 +100,7 @@ function hydrateFromStorage() {
 
 function persistState() {
   const payload = {
-    history: analyzer.history,
-    runningCount: analyzer.runningCount,
-    decksRemaining: analyzer.decksRemaining,
-    cardsPlayed: analyzer.cardsPlayed,
-    cardHistory: analyzer.cardHistory,
+    // 仅持久化偏好与学习画像，不保存局内盘路状态
     learningProfile: analyzer.learningProfile,
     weights
   };
