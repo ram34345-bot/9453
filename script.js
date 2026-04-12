@@ -1,6 +1,7 @@
 const analyzer = new BaccaratAnalyzer();
 let currentRoad = 'bead';
 const STORAGE_KEY = 'baccarat-assistant-state-v1';
+const NIGHTLY_LEARN_KEY = 'baccarat-nightly-learn-date-v1';
 
 let weights = { streak: 75, uniform: 65, slope: 50, jump: 45, pair: 55, crowd: 30 };
 
@@ -10,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadWeightsFromSliders();
   updateUI();
   renderRoadmap();
+  maybeRunNightlyLearning();
   reanalyze();
 
   document.getElementById('recordB').addEventListener('click', () => record('B'));
@@ -87,6 +89,9 @@ function hydrateFromStorage() {
     if (state.weights && typeof state.weights === 'object') {
       weights = { ...weights, ...state.weights };
     }
+    if (state.learningProfile && typeof state.learningProfile === 'object') {
+      analyzer.learningProfile = { ...analyzer.learningProfile, ...state.learningProfile };
+    }
   } catch (_) {
     // ignore invalid local data
   }
@@ -99,9 +104,21 @@ function persistState() {
     decksRemaining: analyzer.decksRemaining,
     cardsPlayed: analyzer.cardsPlayed,
     cardHistory: analyzer.cardHistory,
+    learningProfile: analyzer.learningProfile,
     weights
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+}
+
+function maybeRunNightlyLearning() {
+  const today = new Date().toISOString().slice(0, 10);
+  const lastLearnDate = localStorage.getItem(NIGHTLY_LEARN_KEY);
+  if (lastLearnDate === today) return;
+  const result = analyzer.nightlyLearn(today);
+  if (result.updated) {
+    localStorage.setItem(NIGHTLY_LEARN_KEY, today);
+    persistState();
+  }
 }
 
 function record(result) {
@@ -148,7 +165,8 @@ function displayDecision(analysis) {
   }
 
   const f = analysis.features || {};
-  featDiv.innerHTML = `长龙:${f.streak?.toFixed(2) || 0} 整齐:${f.uniform?.toFixed(2) || 0} 坡度:${f.slope?.toFixed(2) || 0} 单跳:${f.jump?.toFixed(2) || 0} | TC:${analysis.tc || '0.00'}`;
+  const learnDate = analysis.learning?.lastLearnedOn || '未学习';
+  featDiv.innerHTML = `长龙:${f.streak?.toFixed(2) || 0} 整齐:${f.uniform?.toFixed(2) || 0} 坡度:${f.slope?.toFixed(2) || 0} 单跳:${f.jump?.toFixed(2) || 0} 学习:${f.learn?.toFixed(2) || 0} | TC:${analysis.tc || '0.00'} | 学习日:${learnDate}`;
 }
 
 function updateCountDisplay() {
