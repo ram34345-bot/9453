@@ -1,19 +1,29 @@
 const analyzer = new BaccaratAnalyzer();
 let currentRoad = 'bead';
+const STORAGE_KEY = 'baccarat-assistant-state-v1';
+const NIGHTLY_LEARN_KEY = 'baccarat-nightly-learn-date-v1';
 
 let weights = { streak: 75, uniform: 65, slope: 50, jump: 45, pair: 55, crowd: 30 };
 
 document.addEventListener('DOMContentLoaded', () => {
+  hydrateFromStorage();
+  syncSlidersFromWeights();
   loadWeightsFromSliders();
   updateUI();
+  renderRoadmap();
+  maybeRunNightlyLearning();
+  reanalyze();
 
   document.getElementById('recordB').addEventListener('click', () => record('B'));
   document.getElementById('recordP').addEventListener('click', () => record('P'));
   document.getElementById('recordT').addEventListener('click', () => record('T'));
   document.getElementById('resetBtn').addEventListener('click', resetAll);
+  document.getElementById('endSessionBtn').addEventListener('click', endSessionAndLearn);
   document.getElementById('shoeResetBtn').addEventListener('click', () => {
     analyzer.resetShoe();
     updateCountDisplay();
+    reanalyze();
+    persistState();
   });
 
   document.getElementById('updateCountBtn').addEventListener('click', () => {
@@ -23,12 +33,20 @@ document.addEventListener('DOMContentLoaded', () => {
       inp.value = '';
       updateCountDisplay();
       reanalyze();
+      persistState();
+    }
+  });
+  document.getElementById('cardInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      document.getElementById('updateCountBtn').click();
     }
   });
 
   document.getElementById('applyWeightsBtn').addEventListener('click', () => {
     loadWeightsFromSliders();
     reanalyze();
+    persistState();
   });
 
   document.querySelectorAll('.tab').forEach((tab) => {
@@ -50,6 +68,76 @@ function loadWeightsFromSliders() {
   weights.crowd = +document.getElementById('wCrowd').value;
 }
 
+function syncSlidersFromWeights() {
+  document.getElementById('wStreak').value = weights.streak;
+  document.getElementById('wUniform').value = weights.uniform;
+  document.getElementById('wSlope').value = weights.slope;
+  document.getElementById('wJump').value = weights.jump;
+  document.getElementById('wPair').value = weights.pair;
+  document.getElementById('wCrowd').value = weights.crowd;
+}
+
+function hydrateFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const state = JSON.parse(raw);
+    // 为避免上一局影响新局判断，开新页面默认不恢复对局与算牌状态
+    analyzer.history = [];
+    analyzer.runningCount = 0;
+    analyzer.decksRemaining = 6;
+    analyzer.cardsPlayed = 0;
+    analyzer.cardHistory = [];
+    if (state.weights && typeof state.weights === 'object') {
+      weights = { ...weights, ...state.weights };
+    }
+    if (state.learningProfile && typeof state.learningProfile === 'object') {
+      analyzer.learningProfile = { ...analyzer.learningProfile, ...state.learningProfile };
+    }
+  } catch (_) {
+    // ignore invalid local data
+  }
+}
+
+function persistState() {
+  const payload = {
+    // 仅持久化偏好与学习画像，不保存局内盘路状态
+    learningProfile: analyzer.learningProfile,
+    weights
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+}
+
+function maybeRunNightlyLearning() {
+  const today = new Date().toISOString().slice(0, 10);
+  const lastLearnDate = localStorage.getItem(NIGHTLY_LEARN_KEY);
+  if (lastLearnDate === today) return;
+  const result = analyzer.nightlyLearn(today);
+  if (result.updated) {
+    localStorage.setItem(NIGHTLY_LEARN_KEY, today);
+    persistState();
+  }
+}
+
+function endSessionAndLearn() {
+  const today = new Date().toISOString().slice(0, 10);
+  const result = analyzer.nightlyLearn(today, 1);
+  if (!result.updated) {
+    alert('暂无可学习数据，请先记录本局庄/闲结果。');
+    return;
+  }
+
+  localStorage.setItem(NIGHTLY_LEARN_KEY, today);
+  analyzer.history = [];
+  analyzer.resetShoe();
+  updateUI();
+  renderRoadmap();
+  reanalyze();
+  document.getElementById('shoeProgress').innerText = '0';
+  persistState();
+  alert('已完成本局学习，并开始新的一局。');
+}
+
 function record(result) {
   analyzer.addResult(result);
   updateUI();
@@ -58,6 +146,7 @@ function record(result) {
 
   const played = analyzer.history.length;
   document.getElementById('shoeProgress').innerText = played;
+  persistState();
 }
 
 function resetAll() {
@@ -67,6 +156,7 @@ function resetAll() {
   renderRoadmap();
   reanalyze();
   document.getElementById('shoeProgress').innerText = '0';
+  persistState();
 }
 
 function reanalyze() {
@@ -92,7 +182,8 @@ function displayDecision(analysis) {
   }
 
   const f = analysis.features || {};
-  featDiv.innerHTML = `长龙:${f.streak?.toFixed(2) || 0} 整齐:${f.uniform?.toFixed(2) || 0} 坡度:${f.slope?.toFixed(2) || 0} 单跳:${f.jump?.toFixed(2) || 0} | TC:${analysis.tc || '0.00'}`;
+  const learnDate = analysis.learning?.lastLearnedOn || '未学习';
+  featDiv.innerHTML = `长龙:${f.streak?.toFixed(2) || 0} 整齐:${f.uniform?.toFixed(2) || 0} 坡度:${f.slope?.toFixed(2) || 0} 单跳:${f.jump?.toFixed(2) || 0} 学习:${f.learn?.toFixed(2) || 0} | TC:${analysis.tc || '0.00'} | 学习日:${learnDate}`;
 }
 
 function updateCountDisplay() {
@@ -203,4 +294,5 @@ function renderBigEye() {
 function updateUI() {
   updateStats();
   updateCountDisplay();
+  document.getElementById('shoeProgress').innerText = analyzer.history.length;
 }
