@@ -99,6 +99,13 @@ h1 {
   padding: 10px 16px;
 }
 
+.btn.end-session {
+  background: #2b6b3f;
+  color: #f2fff7;
+  font-size: 0.95rem;
+  padding: 10px 16px;
+}
+
 .btn.small {
   padding: 8px 16px;
   font-size: 0.9rem;

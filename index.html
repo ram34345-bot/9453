@@ -23,10 +23,11 @@
         <button class="btn player" id="recordP">闲 (P)</button>
         <button class="btn tie" id="recordT">和 (T)</button>
       </div>
-      <div class="action-row">
-        <button class="btn reset" id="resetBtn">🔄 重置所有</button>
-        <button class="btn shoe-reset" id="shoeResetBtn">♻️ 新靴开始</button>
-      </div>
+            <div class="action-row">
+                <button class="btn reset" id="resetBtn">🔄 重置所有</button>
+                <button class="btn shoe-reset" id="shoeResetBtn">♻️ 新靴开始</button>
+                <button class="btn end-session" id="endSessionBtn">✅ 结束本局并学习</button>
+            </div>
       <div class="shoe-info">
         <span>📊 当前靴进度: <span id="shoeProgress">0</span> / 70 局</span>
         <span class="running-count" id="runningCountDisplay">🏷️ RC: 0</span>
@@ -49,7 +50,7 @@
                 <h2>🧠 综合决策</h2>
                 <span class="badge" id="confidenceBadge">--</span>
             </div>
-            <p class="hint">🤖 每日首次开启会自动学习；每次重新打开页面会从新局开始</p>
+            <p class="hint">🤖 每日首次开启会自动学习；也可按「结束本局并学习」立即学习后开新局</p>
             <div id="decisionDisplay" class="decision-display">
                 <div class="decision-main">等待数据</div>
                 <div class="decision-detail"></div>

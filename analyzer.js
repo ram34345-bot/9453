@@ -136,10 +136,10 @@ class BaccaratAnalyzer {
     this.cardHistory = [];
   }
 
-  nightlyLearn(dateLabel = new Date().toISOString().slice(0, 10)) {
+  nightlyLearn(dateLabel = new Date().toISOString().slice(0, 10), minSamples = 20) {
     const filtered = this.history.filter((r) => r !== 'T');
-    if (filtered.length < 20) {
-      return { updated: false, reason: '样本不足(至少20局)' };
+    if (filtered.length < minSamples) {
+      return { updated: false, reason: `样本不足(至少${minSamples}局)` };
     }
 
     const transitions = { BB: 1, BP: 1, PB: 1, PP: 1 };

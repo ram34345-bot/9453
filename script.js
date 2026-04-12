@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('recordP').addEventListener('click', () => record('P'));
   document.getElementById('recordT').addEventListener('click', () => record('T'));
   document.getElementById('resetBtn').addEventListener('click', resetAll);
+  document.getElementById('endSessionBtn').addEventListener('click', endSessionAndLearn);
   document.getElementById('shoeResetBtn').addEventListener('click', () => {
     analyzer.resetShoe();
     updateCountDisplay();
@@ -116,6 +117,25 @@ function maybeRunNightlyLearning() {
     localStorage.setItem(NIGHTLY_LEARN_KEY, today);
     persistState();
   }
+}
+
+function endSessionAndLearn() {
+  const today = new Date().toISOString().slice(0, 10);
+  const result = analyzer.nightlyLearn(today, 1);
+  if (!result.updated) {
+    alert('暂无可学习数据，请先记录本局庄/闲结果。');
+    return;
+  }
+
+  localStorage.setItem(NIGHTLY_LEARN_KEY, today);
+  analyzer.history = [];
+  analyzer.resetShoe();
+  updateUI();
+  renderRoadmap();
+  reanalyze();
+  document.getElementById('shoeProgress').innerText = '0';
+  persistState();
+  alert('已完成本局学习，并开始新的一局。');
 }
 
 function record(result) {
