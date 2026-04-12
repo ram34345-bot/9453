@@ -6,6 +6,12 @@ class BaccaratAnalyzer {
     this.decksRemaining = 6;
     this.cardsPlayed = 0;
     this.lastResult = null;
+    this.learningProfile = {
+      bAfterB: 0.5,
+      bAfterP: 0.5,
+      samples: 0,
+      lastLearnedOn: null
+    };
   }
 
   addResult(result) {
@@ -130,6 +136,32 @@ class BaccaratAnalyzer {
     this.cardHistory = [];
   }
 
+  nightlyLearn(dateLabel = new Date().toISOString().slice(0, 10)) {
+    const filtered = this.history.filter((r) => r !== 'T');
+    if (filtered.length < 20) {
+      return { updated: false, reason: '样本不足(至少20局)' };
+    }
+
+    const transitions = { BB: 1, BP: 1, PB: 1, PP: 1 };
+    for (let i = 1; i < filtered.length; i++) {
+      const prev = filtered[i - 1];
+      const curr = filtered[i];
+      const key = `${prev}${curr}`;
+      if (transitions[key] !== undefined) transitions[key] += 1;
+    }
+
+    const bAfterB = transitions.BB / (transitions.BB + transitions.BP);
+    const bAfterP = transitions.PB / (transitions.PB + transitions.PP);
+    this.learningProfile = {
+      bAfterB,
+      bAfterP,
+      samples: filtered.length,
+      lastLearnedOn: dateLabel
+    };
+
+    return { updated: true, profile: this.learningProfile };
+  }
+
   weightedAnalyze(weights) {
     const filtered = this.history.filter((r) => r !== 'T');
     const len = filtered.length;
@@ -140,7 +172,7 @@ class BaccaratAnalyzer {
     const heights = this.getColumnHeights(bigRoad);
     const bead = this.generateBeadRoad();
 
-    const features = { streak: 0, uniform: 0, slope: 0, jump: 0, pair: 0, crowd: 0 };
+    const features = { streak: 0, uniform: 0, slope: 0, jump: 0, pair: 0, crowd: 0, learn: 0 };
 
     let streakCount = 1;
     for (let i = len - 2; i >= 0; i--) {
@@ -185,6 +217,11 @@ class BaccaratAnalyzer {
     const lastCol = bead[bead.length - 1];
     if (lastCol && lastCol.length >= 5) features.crowd = lastCol[0] === 'B' ? -0.6 : 0.6;
 
+    if (this.learningProfile.samples > 0) {
+      const pB = last === 'B' ? this.learningProfile.bAfterB : this.learningProfile.bAfterP;
+      features.learn = Math.max(-1, Math.min(1, (pB - 0.5) * 2));
+    }
+
     let total = 0;
     total += features.streak * (weights.streak / 100);
     total += features.uniform * (weights.uniform / 100);
@@ -192,6 +229,7 @@ class BaccaratAnalyzer {
     total += features.jump * (weights.jump / 100);
     total += features.pair * (weights.pair / 100);
     total += features.crowd * (weights.crowd / 100);
+    total += features.learn * 0.35;
 
     const maxWeight = Object.values(weights).reduce((a, b) => a + b / 100, 0);
     const normScore = maxWeight > 0 ? total / maxWeight : 0;
@@ -223,7 +261,8 @@ class BaccaratAnalyzer {
       confidence,
       rawScore: adjustedScore,
       features,
-      tc: this.getTrueCount().toFixed(2)
+      tc: this.getTrueCount().toFixed(2),
+      learning: this.learningProfile
     };
   }
 }
