@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0b0f1c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>百家乐 · 智能路纸分析器</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -20,10 +23,11 @@
         <button class="btn player" id="recordP">闲 (P)</button>
         <button class="btn tie" id="recordT">和 (T)</button>
       </div>
-      <div class="action-row">
-        <button class="btn reset" id="resetBtn">🔄 重置所有</button>
-        <button class="btn shoe-reset" id="shoeResetBtn">♻️ 新靴开始</button>
-      </div>
+            <div class="action-row">
+                <button class="btn reset" id="resetBtn">🔄 重置所有</button>
+                <button class="btn shoe-reset" id="shoeResetBtn">♻️ 新靴开始</button>
+                <button class="btn end-session" id="endSessionBtn">✅ 结束本局并学习</button>
+            </div>
       <div class="shoe-info">
         <span>📊 当前靴进度: <span id="shoeProgress">0</span> / 70 局</span>
         <span class="running-count" id="runningCountDisplay">🏷️ RC: 0</span>
@@ -41,16 +45,17 @@
       </div>
     </section>
 
-    <section class="analysis-result card">
-      <div class="result-header">
-        <h2>🧠 综合决策</h2>
-        <span class="badge" id="confidenceBadge">--</span>
-      </div>
-      <div id="decisionDisplay" class="decision-display">
-        <div class="decision-main">等待数据</div>
-        <div class="decision-detail"></div>
-      </div>
-      <div id="featureDetails" class="feature-details"></div>
+        <section class="analysis-result card">
+            <div class="result-header">
+                <h2>🧠 综合决策</h2>
+                <span class="badge" id="confidenceBadge">--</span>
+            </div>
+            <p class="hint">🤖 每日首次开启会自动学习；也可按「结束本局并学习」立即学习后开新局</p>
+            <div id="decisionDisplay" class="decision-display">
+                <div class="decision-main">等待数据</div>
+                <div class="decision-detail"></div>
+            </div>
+            <div id="featureDetails" class="feature-details"></div>
     </section>
 
     <section class="tuning-panel card">
