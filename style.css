@@ -5,14 +5,13 @@
   --gold: #d8b56a;
   --ink: #eef1ff;
   --muted: #a9afc8;
-  --danger: #e06666;
 }
 
 * { box-sizing: border-box; }
 body {
   margin: 0;
   font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
-  background: radial-gradient(circle at top, #27273a, var(--bg));
+  background: radial-gradient(circle at top, #2b2940, var(--bg));
   color: var(--ink);
 }
 
@@ -36,7 +35,8 @@ body {
 }
 .topbar h1 { margin: 0; font-size: 1.5rem; color: var(--gold); }
 .topbar p { margin: 4px 0 0; color: var(--muted); }
-.topbar-actions { display: flex; gap: 8px; }
+.topbar-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+
 button {
   border: 1px solid #51557d;
   background: #2a2f49;
@@ -45,13 +45,14 @@ button {
   padding: 8px 12px;
   cursor: pointer;
 }
-button:hover { filter: brightness(1.12); }
+button:hover { filter: brightness(1.1); }
 
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 340px;
   gap: 12px;
 }
+
 .canvas-wrap {
   position: relative;
   overflow: hidden;
@@ -61,14 +62,13 @@ button:hover { filter: brightness(1.12); }
   width: 100%;
   height: auto;
   display: block;
-  background: #243036;
   border-radius: 10px;
   border: 1px solid #4a4f75;
 }
 .hint {
   margin-top: 8px;
   font-size: 0.9rem;
-  color: var(--muted);
+  color: #d6dbf8;
 }
 
 .panel { padding: 10px; display: flex; flex-direction: column; gap: 12px; }
@@ -81,7 +81,7 @@ button:hover { filter: brightness(1.12); }
 }
 #questList, #soulList { margin: 0; padding-left: 18px; color: #d8def5; }
 .log {
-  height: 180px;
+  height: 200px;
   overflow: auto;
   border: 1px solid #353a5c;
   border-radius: 8px;
@@ -90,6 +90,37 @@ button:hover { filter: brightness(1.12); }
   font-size: 0.85rem;
 }
 .log div { margin-bottom: 6px; color: #c8d0ef; }
+
+.guide {
+  margin-top: 12px;
+  padding: 12px;
+}
+.guide h2 {
+  margin: 0 0 8px;
+  font-size: 1.06rem;
+  color: var(--gold);
+}
+.guide ol {
+  margin: 0;
+  padding-left: 18px;
+  color: #dde4ff;
+  display: grid;
+  gap: 4px;
+}
+.control-grid {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.control-grid > div {
+  border: 1px solid #3b4062;
+  background: #161b2f;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 0.9rem;
+}
+.guide.hide { display: none; }
 
 .mobile-controls {
   display: none;
@@ -115,7 +146,7 @@ button:hover { filter: brightness(1.12); }
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: rgba(227, 231, 255, 0.75);
+  background: rgba(227, 231, 255, 0.82);
 }
 .mobile-buttons {
   position: absolute;
@@ -126,7 +157,11 @@ button:hover { filter: brightness(1.12); }
   gap: 8px;
   pointer-events: auto;
 }
-.mobile-buttons button { padding: 10px 4px; font-size: 0.85rem; }
+.mobile-buttons button {
+  padding: 10px 4px;
+  font-size: 0.85rem;
+  background: #303655cc;
+}
 
 .modal {
   position: fixed;
@@ -148,9 +183,10 @@ button:hover { filter: brightness(1.12); }
 @media (max-width: 980px) {
   .layout { grid-template-columns: 1fr; }
   .panel { order: 2; }
+  .control-grid { grid-template-columns: 1fr; }
 }
 
 @media (hover: none) and (pointer: coarse) {
   .mobile-controls { display: block; }
-  .hint { font-size: 0.8rem; }
+  .hint { font-size: 0.82rem; }
 }

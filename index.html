@@ -17,13 +17,14 @@
         <button id="saveBtn">存檔</button>
         <button id="loadBtn">讀檔</button>
         <button id="resetBtn">新遊戲</button>
+        <button id="toggleGuideBtn">操作說明</button>
       </div>
     </header>
 
     <main class="layout">
       <section class="canvas-wrap card">
         <canvas id="gameCanvas" width="1024" height="640"></canvas>
-        <div class="hint" id="hintText">WASD/方向鍵移動，J 攻擊，E 互動，M 上馬，K 技能，B 背包</div>
+        <div class="hint" id="hintText">移動到 NPC 附近按 E 互動，先接主線再前往妖霧森林戰鬥。</div>
 
         <div id="mobileControls" class="mobile-controls">
           <div id="joystickBase" class="joystick-base">
@@ -60,6 +61,20 @@
         </section>
       </aside>
     </main>
+
+    <section id="guidePanel" class="guide card">
+      <h2>新手導覽（看這裡就能開始玩）</h2>
+      <ol>
+        <li>先去 <b>青州小鎮</b> 找「鎮長」按 <b>E</b> 接主線。</li>
+        <li>往右進入 <b>妖霧森林</b>，靠近妖怪按 <b>J</b> 攻擊。</li>
+        <li>擊敗特定妖怪後，會彈出「<b>斬殺 / 收服</b>」可獲得妖魂被動。</li>
+        <li>惡名太高會被捕快追擊；死亡會在最近神龕復活，不會重開檔。</li>
+      </ol>
+      <div class="control-grid">
+        <div><b>電腦：</b>WASD/方向鍵移動，J攻擊，E互動，K技能，M上馬，B喝藥</div>
+        <div><b>手機：</b>左下虛擬搖桿 + 右下觸控按鈕</div>
+      </div>
+    </section>
   </div>
 
   <div id="choiceModal" class="modal hidden">
