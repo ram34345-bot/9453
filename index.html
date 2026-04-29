@@ -1,106 +1,93 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no">
-  <title>百家乐 · 智能路纸分析器</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>山海行者 - 原型</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="app-container">
-    <header>
-      <h1>🎲 百家乐 · 路纸决策助手</h1>
-      <p class="subtitle">多路协同 · 加权评分 · 算牌辅助</p>
+  <div class="game-shell">
+    <header class="topbar">
+      <div>
+        <h1>《山海行者》</h1>
+        <p>中國神話風 2D 開放世界 RPG 原型</p>
+      </div>
+      <div class="topbar-actions">
+        <button id="saveBtn">存檔</button>
+        <button id="loadBtn">讀檔</button>
+        <button id="resetBtn">新遊戲</button>
+        <button id="toggleGuideBtn">操作說明</button>
+      </div>
     </header>
 
-    <section class="control-panel card">
-      <h2>📝 记录每一局</h2>
-      <div class="button-group">
-        <button class="btn banker" id="recordB">庄 (B)</button>
-        <button class="btn player" id="recordP">闲 (P)</button>
-        <button class="btn tie" id="recordT">和 (T)</button>
-      </div>
-      <div class="action-row">
-        <button class="btn reset" id="resetBtn">🔄 重置所有</button>
-        <button class="btn shoe-reset" id="shoeResetBtn">♻️ 新靴开始</button>
-      </div>
-      <div class="shoe-info">
-        <span>📊 当前靴进度: <span id="shoeProgress">0</span> / 70 局</span>
-        <span class="running-count" id="runningCountDisplay">🏷️ RC: 0</span>
+    <main class="layout">
+      <section class="canvas-wrap card">
+        <canvas id="gameCanvas" width="1024" height="640"></canvas>
+        <div class="hint" id="hintText">移動到 NPC 附近按 E 互動，先接主線再前往妖霧森林戰鬥。</div>
+
+        <div id="mobileControls" class="mobile-controls">
+          <div id="joystickBase" class="joystick-base">
+            <div id="joystickStick" class="joystick-stick"></div>
+          </div>
+          <div class="mobile-buttons">
+            <button id="btnAttack">攻擊</button>
+            <button id="btnInteract">互動</button>
+            <button id="btnSkill">技能</button>
+            <button id="btnMount">上馬</button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel card">
+        <section>
+          <h2>角色狀態</h2>
+          <div id="playerStats" class="grid"></div>
+        </section>
+
+        <section>
+          <h2>任務</h2>
+          <ul id="questList"></ul>
+        </section>
+
+        <section>
+          <h2>妖魂契約</h2>
+          <ul id="soulList"></ul>
+        </section>
+
+        <section>
+          <h2>事件日誌</h2>
+          <div id="log" class="log"></div>
+        </section>
+      </aside>
+    </main>
+
+    <section id="guidePanel" class="guide card">
+      <h2>新手導覽（看這裡就能開始玩）</h2>
+      <ol>
+        <li>先去 <b>青州小鎮</b> 找「鎮長」按 <b>E</b> 接主線。</li>
+        <li>往右進入 <b>妖霧森林</b>，靠近妖怪按 <b>J</b> 攻擊。</li>
+        <li>擊敗特定妖怪後，會彈出「<b>斬殺 / 收服</b>」可獲得妖魂被動。</li>
+        <li>惡名太高會被捕快追擊；死亡會在最近神龕復活，不會重開檔。</li>
+      </ol>
+      <div class="control-grid">
+        <div><b>電腦：</b>WASD/方向鍵移動，J攻擊，E互動，K技能，M上馬，B喝藥</div>
+        <div><b>手機：</b>左下虛擬搖桿 + 右下觸控按鈕</div>
       </div>
     </section>
-
-    <section class="roadmap-section card">
-      <div class="tabs">
-        <button class="tab active" data-road="bead">珠盘路</button>
-        <button class="tab" data-road="big">大路</button>
-        <button class="tab" data-road="bigeye">大眼仔</button>
-      </div>
-      <div id="roadmapContainer" class="roadmap-container">
-        <div class="roadmap-placeholder">点击上方按钮开始记录</div>
-      </div>
-    </section>
-
-    <section class="analysis-result card">
-      <div class="result-header">
-        <h2>🧠 综合决策</h2>
-        <span class="badge" id="confidenceBadge">--</span>
-      </div>
-      <div id="decisionDisplay" class="decision-display">
-        <div class="decision-main">等待数据</div>
-        <div class="decision-detail"></div>
-      </div>
-      <div id="featureDetails" class="feature-details"></div>
-    </section>
-
-    <section class="tuning-panel card">
-      <h3>⚖️ 调整你的路感权重</h3>
-      <div class="slider-group">
-        <label><span>📈 长龙强度</span> <input type="range" id="wStreak" min="0" max="100" value="75"></label>
-        <label><span>🧱 列高整齐</span> <input type="range" id="wUniform" min="0" max="100" value="65"></label>
-        <label><span>📐 庄闲坡度</span> <input type="range" id="wSlope" min="0" max="100" value="50"></label>
-        <label><span>🔄 单跳敏感</span> <input type="range" id="wJump" min="0" max="100" value="45"></label>
-        <label><span>🔁 双跳规律</span> <input type="range" id="wPair" min="0" max="100" value="55"></label>
-        <label><span>🧩 拥挤反转</span> <input type="range" id="wCrowd" min="0" max="100" value="30"></label>
-      </div>
-      <button class="btn apply-weights" id="applyWeightsBtn">应用权重并重新分析</button>
-    </section>
-
-    <section class="counting-panel card">
-      <h3>🃏 基础算牌追踪</h3>
-      <p class="hint">输入每局实际牌值 (2-9, T/J/Q/K, A) 更新计数</p>
-      <div class="card-input-area">
-        <input type="text" id="cardInput" placeholder="例: 4,9,T,A" maxlength="20" inputmode="text" autocapitalize="characters">
-        <button class="btn small" id="updateCountBtn">更新计数</button>
-      </div>
-      <div class="count-stats">
-        <div>流水计数 (RC): <span id="rcValue">0</span></div>
-        <div>剩余副数: ≈ <span id="decksLeft">6.0</span></div>
-        <div>真实计数 (TC): <span id="tcValue">0.00</span></div>
-        <div>庄闲优势倾向: <span id="countSuggestion">—</span></div>
-      </div>
-      <p class="footnote">* 简化Hi-Lo: 2-6=+1, 7-9=0, T/J/Q/K/A=-1</p>
-    </section>
-
-    <section class="stats-panel card">
-      <h3>📊 近期统计 (近20局)</h3>
-      <div id="statsDisplay" class="stats-grid">
-        <div>总: <span id="totalHands">0</span></div>
-        <div>庄: <span id="bankerCount">0</span></div>
-        <div>闲: <span id="playerCount">0</span></div>
-        <div>和: <span id="tieCount">0</span></div>
-        <div>庄率: <span id="bankerRate">0%</span></div>
-        <div>闲率: <span id="playerRate">0%</span></div>
-        <div>当前连: <span id="streakInfo">-</span></div>
-      </div>
-    </section>
-
-    <footer>
-      <p class="risk-warning">⚠️ 本工具仅供娱乐与学习。所有分析基于历史图形，无法保证未来结果。请理性游戏，设定止损。</p>
-    </footer>
   </div>
 
-  <script src="analyzer.js"></script>
-  <script src="script.js"></script>
+  <div id="choiceModal" class="modal hidden">
+    <div class="modal-card">
+      <h3 id="choiceTitle">是否處置妖怪？</h3>
+      <p id="choiceDesc"></p>
+      <div class="choice-actions">
+        <button id="killChoice">斬殺</button>
+        <button id="captureChoice">收服</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
 </body>
 </html>
